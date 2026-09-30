@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum UserRole {
+  PATIENT
+  CAREGIVER
+  PHYSICIAN
+}
+
+enum MedicationStatus {
+  TAKEN
+  MISSED
+  PENDING
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  HIGH
+}
+
+model User {
+  id                   Int              @id @default(autoincrement())
+  name                 String
+  email                String           @unique
+  password             String
+  role                 UserRole         @default(PATIENT)
+  createdAt            DateTime         @default(now())
+  medications          Medication[]
+  medicationLogs       MedicationLog[]
+  vitals               Vital[]
+  appointments         Appointment[]
+  alerts               Alert[]
+  patientConnections   CareConnection[] @relation("PatientConnections")
+  caregiverConnections CareConnection[] @relation("CaregiverConnections")
+  physicianConnections CareConnection[] @relation("PhysicianConnections")
+}
+
+model Medication {
+  id        Int              @id @default(autoincrement())
+  userId    Int
+  name      String
+  dosage    String
+  schedule  String
+  stock     Int              @default(0)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs      MedicationLog[]
+}
+
+model MedicationLog {
+  id           Int              @id @default(autoincrement())
+  medicationId Int
+  userId       Int
+  status       MedicationStatus @default(PENDING)
+  scheduledAt  DateTime
+  takenAt      DateTime?
+  medication   Medication       @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Vital {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  heartRate  Int?
+  systolic   Int?
+  diastolic  Int?
+  glucose    Float?
+  recordedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Appointment {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  title  String
+  doctor String
+  date   String
+  time   String
+  status String @default("Scheduled")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Alert {
+  id         Int           @id @default(autoincrement())
+  userId     Int
+  type       String
+  message    String
+  severity   AlertSeverity @default(INFO)
+  read       Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CareConnection {
+  id          Int      @id @default(autoincrement())
+  patientId   Int
+  caregiverId Int?
+  physicianId Int?
+  createdAt   DateTime @default(now())
+  patient     User     @relation("PatientConnections", fields: [patientId], references: [id], onDelete: Cascade)
+  caregiver   User?    @relation("CaregiverConnections", fields: [caregiverId], references: [id], onDelete: SetNull)
+  physician   User?    @relation("PhysicianConnections", fields: [physicianId], references: [id], onDelete: SetNull)
+}
