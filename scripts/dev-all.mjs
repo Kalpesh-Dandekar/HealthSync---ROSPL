@@ -1,10 +1,18 @@
 import { spawn } from "node:child_process";
+import path from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const spawnOptions = (cwd) => ({
+  stdio: "inherit",
+  cwd,
+  shell: process.platform === "win32",
+});
 const children = [
-  spawn(npm, ["run", "dev"], { stdio: "inherit", cwd: process.cwd(), shell: false }),
-  spawn(npm, ["run", "dev"], { stdio: "inherit", cwd: `${process.cwd()}/backend`, shell: false }),
+  spawn(npm, ["run", "dev"], spawnOptions(path.join(repositoryRoot, "frontend"))),
+  spawn(npm, ["run", "dev"], spawnOptions(path.join(repositoryRoot, "backend"))),
 ];
 const stop = () => children.forEach(c => c.kill("SIGTERM"));
 process.on("SIGINT", stop); process.on("SIGTERM", stop);

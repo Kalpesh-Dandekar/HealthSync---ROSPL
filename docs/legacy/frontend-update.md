@@ -1,5 +1,7 @@
 # HealthSync frontend update
 
+> Historical frontend milestone. The backend and database have since been implemented.
+
 This version is a frontend-first redesign of the original ROSPL project.
 
 Changes:
@@ -9,6 +11,6 @@ Changes:
 - Redesigned desktop navigation/sidebar with role/workspace context.
 - Improved mobile navigation with a compact four-tab bottom bar and a full navigation drawer for remaining sections.
 - Preserved the existing patient, caregiver, physician routes and application logic.
-- No database/backend migration has been made in this version.
+- At the time of this milestone, no database/backend migration had been made.
 
-Next stage can add the real-time backend and improve the existing adherence-risk ML module.
+Later milestones added the real-time backend and updated the adherence-risk implementation.

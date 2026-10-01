@@ -1,13 +1,19 @@
 # Dependencies and build output
-node_modules/
-dist/
-build/
-coverage/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+backend/node_modules/
+backend/build/
+backend/coverage/
 
 # Environment and local configuration
-.env
-.env.*
-!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
 *.local
 
 # Logs

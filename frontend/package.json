@@ -7,11 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview",
-    "backend:install": "npm --prefix backend install",
-    "backend:dev": "npm --prefix backend run dev",
-    "backend:start": "npm --prefix backend start",
-    "dev:all": "node scripts/dev-all.mjs"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

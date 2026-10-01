@@ -1,5 +1,8 @@
 # HealthSync - Completed Full-Stack Update
 
+> Historical implementation snapshot. Current setup instructions live in
+> the root README and `backend/README.md`.
+
 This version keeps the existing UI and completes the database-backed patient, caregiver and physician workflows.
 
 ## Completed
@@ -25,7 +28,7 @@ This version keeps the existing UI and completes the database-backed patient, ca
 
 ### Frontend
 
-From the project root:
+From `frontend/`:
 
 ```bash
 npm install
@@ -47,7 +50,7 @@ Create `backend/.env` from `backend/.env.example` and set:
 
 ```env
 DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE
-JWT_SECRET=your-secret
+JWT_SECRET=REPLACE_WITH_A_RANDOM_SECRET_AT_LEAST_32_CHARACTERS
 PORT=5000
 CLIENT_ORIGIN=http://localhost:5173
 OLLAMA_URL=http://localhost:11434

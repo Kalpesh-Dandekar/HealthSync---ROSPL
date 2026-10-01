@@ -1,109 +1,58 @@
 # HealthSync
 
-**Caregiver-inclusive medication adherence & remote monitoring platform**
-*ITL704 — Recent Open Source Project Lab*
+**Caregiver-inclusive medication adherence and remote monitoring platform**
 
-## What this is
+HealthSync connects patients, caregivers, and physicians through shared medication, vital-sign, appointment, alert, report, and care-network workflows.
 
-Most medication-adherence apps talk to one person: the patient. HealthSync is
-built around a different premise — that an informal caregiver (a daughter, a
-spouse, a home health aide) is often the one actually managing medication,
-and that they are left guessing whether a dose was taken. HealthSync closes
-that loop: every dose, vital reading, appointment, and note is visible in
-real time to the patient, their caregiver, and their physician from one
-shared record.
+## Repository structure
 
-The product direction is grounded in three pieces of published research
-(full citations in the project report):
-
-- **Adhera** (Zhou, 2025) — a caregiver-inclusive medication adherence study
-  that found caregivers experience real anxiety and sleep disruption from
-  *not knowing* whether a dose was taken, and that most adherence tools are
-  patient-only. HealthSync's real-time dose feed, caregiver dashboard, and
-  "care network" note thread are a direct response to this.
-- **The impact of EHRs on patient care and outcomes** (Adeniyi et al., 2024)
-  — motivates the shared, standards-oriented health record and the
-  physician view of adherence + vitals history.
-- **mHealth applications for remote monitoring** (Jat & Grønli, 2023) —
-  motivates the vitals trend view and the shift toward continuous,
-  between-visit monitoring rather than snapshot-only checkups.
+```text
+frontend/   React, TypeScript, Vite, Tailwind CSS
+backend/    Express, Prisma, PostgreSQL, Socket.IO
+docs/       Technical notes and preserved implementation history
+scripts/    Project-wide development utilities
+```
 
 ## Roles
 
-| Role | What they see |
+| Role | Main workspace |
 |---|---|
-| **Patient** | Today's medicines, adherence ring, vitals trend, appointments, reports, health record, care network, Emergency SOS |
-| **Caregiver** | Live dose feed, alerts, appointments, reports, care network |
-| **Physician** | Patient panel, appointments, reports, emergency log, care network |
+| Patient | Medications, vitals, appointments, records, reports, care network, and emergency SOS |
+| Caregiver | Connected patients, medication monitoring, alerts, appointments, reports, and care notes |
+| Physician | Connected patients, clinical updates, appointments, reports, and emergency log |
 
-## Tech stack (all open source)
-
-- **Frontend:** React 19 + Vite + TypeScript + Tailwind CSS, `react-router-dom`, `lucide-react`
-- **Backend:** Node.js + Express, PostgreSQL + Prisma, JWT auth, Socket.IO for real-time dose/alert sync
-- **Frontend data layer:** `AppDataContext` now calls the Express API when the backend is available and falls back to demo data when it is offline. Socket.IO updates open role workspaces in real time.
-
-## Getting started
-
-Frontend only:
+## Frontend
 
 ```bash
-npm install
+cd frontend
+npm ci
 npm run dev
 ```
 
-Full-stack local setup: see `BACKEND_SETUP.md`.
+The frontend environment template is `frontend/.env.example`.
 
-Open the app and pick a role (Patient / Caregiver / Physician) from the
-landing screen — no login required in this prototype.
+## Backend
 
-## Project structure
+See [`backend/README.md`](backend/README.md) for the complete PostgreSQL, environment, Prisma migration, and startup workflow.
 
-```
-src/
-  components/
-    layout/AppShell.tsx      # shared sidebar + mobile nav shell, role-aware
-    ui/                       # Card, Badge, AdherenceRing primitives
-  api/
-    healthsyncApi.ts           # REST + Socket.IO client
-  data/
-    mockData.ts                # fallback demo data
-    AppDataContext.tsx         # API-backed state + real-time event bridge
-server/
-  index.js                     # Express + Socket.IO API
-  prisma/schema.prisma         # PostgreSQL schema
-  prisma/seed.js               # demo database seed
-  pages/
-    patient/  caregiver/  doctor/   # role-specific screens
-    shared/                          # screens reused across roles (Care Network, Appointments, Reports)
-```
-
-## Roadmap
-
-1. **Completed:** Express + PostgreSQL + Prisma persistence
-2. **Completed:** Socket.IO real-time dose/alert/SOS/care-network sync
-3. **Completed:** JWT + bcrypt demo authentication and role-aware API permissions
-4. Next: FHIR-shaped export for Reports/Records
-5. Next: connect the ML risk history to persisted multi-day dose events
-
-## HealthSync backend
-
-The backend is in `backend/` and uses PostgreSQL + Prisma + Express + JWT/bcrypt + Socket.IO.
-
-From the project root:
-
-```bash
-npm install
-npm run backend:install
-```
-
-Copy `backend/.env.example` to `backend/.env` and set your PostgreSQL password.
-
-Then:
+The short version, after configuring the ignored `backend/.env`, is:
 
 ```bash
 cd backend
-npx prisma generate
+npm ci
+npm run prisma:deploy
+npm run prisma:generate
 npm run dev
 ```
 
-If the `healthsync` database is new/empty, run `npx prisma migrate dev --name init` once. If you already migrated the database, do not migrate again.
+The database-aware health endpoint is `http://localhost:5000/api/health`.
+
+## Run both applications
+
+After installing dependencies independently in `frontend/` and `backend/`, run this from the repository root:
+
+```bash
+node scripts/dev-all.mjs
+```
+
+Optional local AI setup is available through `scripts/setup-ai.ps1`. Technical notes are organized under `docs/`.
