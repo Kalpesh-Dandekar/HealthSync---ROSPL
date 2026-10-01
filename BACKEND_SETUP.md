@@ -17,20 +17,20 @@ Then copy:
 
 `backend/.env.example` → `backend/.env`
 
-Set your PostgreSQL password in `DATABASE_URL`.
+Set `DATABASE_URL` for an empty local PostgreSQL database and replace the
+`JWT_SECRET` placeholder with a unique random value of at least 32 characters.
 
 ## Prisma
 
 ```bash
 cd backend
-npx prisma generate
+npm run prisma:deploy
+npm run prisma:generate
 ```
 
-The HealthSync `healthsync` database used during development is already connected and migrated. For a brand-new empty database, run:
-
-```bash
-npx prisma migrate dev --name init
-```
+Use `npm run prisma:migrate -- --name descriptive_name` only when intentionally
+changing the Prisma schema and creating a new development migration. See
+`backend/README.md` for the complete environment contract and setup workflow.
 
 ## Start
 

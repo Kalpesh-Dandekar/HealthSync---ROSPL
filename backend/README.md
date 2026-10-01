@@ -1,23 +1,57 @@
 # HealthSync Backend
 
-Node.js + Express + PostgreSQL + Prisma + JWT + bcrypt + Socket.IO.
+Node.js, Express, PostgreSQL, Prisma, JWT, bcrypt, and Socket.IO.
 
-## First setup
+## Prerequisites
 
-From `ROSPL-PROJECT/backend`:
+- Node.js and npm
+- A local PostgreSQL server
+- An empty development database, such as `healthsync_dev`
+
+## First-time setup
+
+From the `backend` directory:
 
 ```bash
-npm install
-npx prisma generate
+npm ci
 ```
 
-If PostgreSQL `healthsync` is a new/empty database:
+Create an empty local database with PostgreSQL's `createdb` utility (or create
+the same database in your PostgreSQL administration tool):
 
 ```bash
-npx prisma migrate dev --name init
+createdb healthsync_dev
 ```
 
-If you already completed the migration in your existing `healthsync` database, **do not run another migration**. The schema is already in sync.
+Copy the environment template without committing the resulting `.env` file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+On macOS or Linux:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and set:
+
+- `DATABASE_URL` to your local PostgreSQL database.
+- `JWT_SECRET` to a unique random value of at least 32 characters. Do not reuse the example placeholder.
+
+One way to generate a local secret is:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+Apply the committed migrations and generate Prisma Client:
+
+```bash
+npm run prisma:deploy
+npm run prisma:generate
+```
 
 Start the backend:
 
@@ -25,31 +59,35 @@ Start the backend:
 npm run dev
 ```
 
-Test:
+The database-aware health endpoint is available at:
 
-`http://localhost:5000/api/health`
-
-## Environment
-
-Copy `.env.example` to `.env` and put your real PostgreSQL password in `DATABASE_URL`.
-Never commit `.env`.
-
-
-## Patient data entry
-
-The patient dashboard now has **Add Data** at `/patient/add-data`.
-
-It saves real data to PostgreSQL through Prisma:
-- Medications
-- Vital readings
-- Appointments
-
-After extracting the project, create `backend/.env` from `.env.example`, then run from `backend`:
-
-```powershell
-npm install
-npx prisma generate
-npm run dev
+```text
+http://localhost:5000/api/health
 ```
 
-Run the frontend separately with `npm install` and `npm run dev` from the project root.
+It returns HTTP 200 only when PostgreSQL is reachable and HTTP 503 when the database is unavailable.
+
+## Migration workflows
+
+When intentionally changing the Prisma schema during development, create a new migration with:
+
+```bash
+npm run prisma:migrate -- --name descriptive_migration_name
+```
+
+To initialize a fresh database from migrations already committed to Git, use:
+
+```bash
+npm run prisma:deploy
+```
+
+`prisma migrate dev` creates development migrations. `prisma migrate deploy` only applies committed migrations and is the reproducible command for fresh or non-development environments.
+
+## Optional integrations
+
+- `OLLAMA_URL` and `OLLAMA_MODEL` configure local Ollama support. HealthSync continues with its built-in response fallback if Ollama is unavailable.
+- Python and `clingo` enable the optional appointment solver. The JavaScript constraint fallback remains available when they are absent.
+
+## Demo data
+
+No seed data is required to start the backend. Users can register through the existing API. The optional `link-demo-team` script only links existing demo accounts and is not part of database initialization.
