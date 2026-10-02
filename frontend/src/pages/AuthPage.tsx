@@ -26,9 +26,9 @@ type Role = "PATIENT" | "CAREGIVER" | "PHYSICIAN";
 type FieldErrors = Partial<Record<"name" | "email" | "password" | "confirmPassword", string>>;
 
 const roleOptions = [
-  { value: "PATIENT", label: "Patient", description: "Manage medications, appointments and health records.", icon: UserRound, tone: "cyan" },
-  { value: "PHYSICIAN", label: "Doctor", description: "Coordinate appointments, prescriptions and patient care.", icon: Stethoscope, tone: "blue" },
-  { value: "CAREGIVER", label: "Caregiver", description: "Support linked patients with adherence visibility and alerts.", icon: Users, tone: "violet" },
+  { value: "PATIENT", label: "Patient", description: "Manage your health and daily care.", icon: UserRound, tone: "cyan" },
+  { value: "PHYSICIAN", label: "Doctor", description: "Coordinate care and patient follow-up.", icon: Stethoscope, tone: "blue" },
+  { value: "CAREGIVER", label: "Caregiver", description: "Support a connected patient’s care.", icon: Users, tone: "violet" },
 ] as const;
 
 function Brand() {
