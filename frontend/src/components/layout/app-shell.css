@@ -33,3 +33,28 @@
 @media (max-width: 1023px) {
   .app-shell { min-height: 100vh; height: auto; overflow: visible; }
 }
+
+/* Patient-only clinical shell. Doctor and caregiver retain the approved dark system. */
+.app-shell-patient { background: #edf3f8; color: #132238; }
+.app-shell-patient .app-sidebar,
+.app-shell-patient .app-drawer,
+.app-shell-patient .app-mobile-header { background: #0a1729; border-color: rgba(148,163,184,.13); box-shadow: 18px 0 52px rgba(7,18,36,.16); }
+.app-shell-patient .app-sidebar { width: 252px; }
+.app-shell-patient .app-brand { padding-top: 1rem; padding-bottom: .75rem; }
+.app-shell-patient .app-workspace { margin-top: .5rem; padding: .7rem .85rem; border-radius: .8rem; background: rgba(30,45,70,.58); }
+.app-shell-patient .app-workspace .app-muted { display: none; }
+.app-shell-patient .app-nav { padding-top: 1rem; padding-bottom: 1rem; scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.22) transparent; }
+.app-shell-patient .app-nav > div { margin-bottom: .8rem; }
+.app-shell-patient .app-nav-link { padding-top: .5rem; padding-bottom: .5rem; border-radius: .7rem; }
+.app-shell-patient .app-nav-icon { width: 1.8rem; height: 1.8rem; }
+.app-shell-patient .app-nav-link.is-active { background: rgba(99,102,241,.2); box-shadow: inset 3px 0 #818cf8; }
+.app-shell-patient .app-profile { padding: .65rem .8rem; }
+.app-shell-patient .app-user { padding: .55rem .65rem; background: rgba(30,45,70,.5); }
+.app-shell-patient .app-logout { margin-top: .35rem; padding-top: .4rem; padding-bottom: .4rem; }
+.app-shell-patient .app-ambient { background: radial-gradient(circle at 82% 0%,rgba(79,70,229,.055),transparent 30%),linear-gradient(180deg,#f1f6fa 0%,#edf3f8 50%,#eaf1f6 100%); }
+.app-shell-patient main { scrollbar-color: #c7d2df transparent; }
+
+@media (max-width: 1023px) {
+  .app-shell-patient .app-mobile-header,
+  .app-shell-patient .app-drawer { color: #f8fafc; }
+}

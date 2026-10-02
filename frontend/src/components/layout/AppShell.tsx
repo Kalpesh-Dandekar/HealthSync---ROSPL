@@ -55,7 +55,7 @@ export function AppShell({
   };
 
   return (
-    <div className="app-shell h-screen overflow-hidden text-charcoal-900 lg:flex">
+    <div className={`app-shell app-shell-${role} h-screen overflow-hidden text-charcoal-900 lg:flex`}>
       {/* Desktop navigation */}
       <aside className="app-sidebar hidden w-[272px] min-h-0 shrink-0 flex-col lg:flex">
         <div className="app-brand px-5 py-5">

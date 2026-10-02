@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Bot, Calendar, ClipboardList, FileText, HeartPulse, LayoutDashboard, Pill, Users } from "lucide-react";
 import { AppShell, type NavItem } from "../../components/layout/AppShell";
+import "./patient-clinical.css";
 import { useAppData } from "../../data/AppDataContext";
 const navItems:NavItem[]=[
  {to:"/patient",label:"Overview",icon:LayoutDashboard,end:true,group:"My health"},

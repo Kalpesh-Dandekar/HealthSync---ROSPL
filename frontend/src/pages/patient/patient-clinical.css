@@ -1,0 +1,108 @@
+/* Patient-only clinical visual system. Shared Doctor/Caregiver primitives remain unchanged. */
+.app-shell-patient .patient-page{--patient-panel:#fff;--patient-line:#dbe5ee;--patient-muted:#607189;color:#15253b;gap:.9rem}
+.app-shell-patient .patient-page-header{align-items:center;padding:.15rem .1rem .25rem}
+.app-shell-patient .patient-page-header>div:first-child>span{display:none}
+.app-shell-patient .patient-page-header h1{margin:0 0 .22rem;font-size:clamp(1.45rem,2vw,1.8rem);color:#12233a}
+.app-shell-patient .patient-page-header p{color:#64758b;font-size:.78rem}
+.app-shell-patient .patient-section-card{border-color:#dce6ef;border-radius:.9rem;background:#fff;box-shadow:0 8px 24px rgba(31,55,83,.055)}
+.app-shell-patient .patient-section-head{margin-bottom:.8rem}
+.app-shell-patient .patient-section-head h2{color:#16283f;font-size:.92rem}
+.app-shell-patient .patient-section-head p{color:#718197}
+.app-shell-patient .patient-primary-button{background:#5145cd;box-shadow:0 7px 18px rgba(79,70,229,.17)}
+.app-shell-patient .patient-primary-button:hover{background:#4338ca}
+.app-shell-patient .patient-secondary-button{border-color:#cbd8e5;color:#263b55;background:#f8fafc}
+.app-shell-patient .patient-secondary-button:hover{border-color:#aabbd0;background:#f0f5f9}
+.app-shell-patient .patient-danger-button{border-color:#fecaca;color:#b4232f;background:#fff5f5}
+.app-shell-patient .patient-field>span{color:#40536b}
+.app-shell-patient .patient-field input,.app-shell-patient .patient-field select,.app-shell-patient .patient-field textarea,.app-shell-patient .patient-input{border-color:#cfdce8;color:#172a43;background:#f8fbfd;box-shadow:inset 0 1px 1px rgba(31,55,83,.025)}
+.app-shell-patient .patient-field input::placeholder,.app-shell-patient .patient-field textarea::placeholder,.app-shell-patient .patient-input::placeholder{color:#94a3b8}
+.app-shell-patient .patient-field input:focus-visible,.app-shell-patient .patient-field select:focus-visible,.app-shell-patient .patient-field textarea:focus-visible,.app-shell-patient .patient-input:focus-visible{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.app-shell-patient .patient-field small{color:#718197}
+.app-shell-patient .patient-notice{border-color:#c7d2fe;color:#3730a3;background:#eef2ff}
+.app-shell-patient .patient-notice.is-success{border-color:#bbf7d0;color:#166534;background:#f0fdf4}
+.app-shell-patient .patient-notice.is-warning{border-color:#fde68a;color:#92400e;background:#fffbeb}
+.app-shell-patient .patient-notice.is-error{border-color:#fecaca;color:#991b1b;background:#fef2f2}
+.app-shell-patient .patient-ui-empty{min-height:92px;padding:1rem;border:0;background:#f6f9fc;color:#718197}
+.app-shell-patient .patient-ui-empty svg{color:#64748b}
+.app-shell-patient .patient-ui-empty h3{color:#263b55}
+.app-shell-patient .patient-status-pill{color:#475569;background:#edf2f7}
+.app-shell-patient .patient-status-pill.is-success{color:#166534;background:#dcfce7}
+.app-shell-patient .patient-status-pill.is-warning{color:#92400e;background:#fef3c7}
+.app-shell-patient .patient-status-pill.is-error{color:#b91c1c;background:#fee2e2}
+.app-shell-patient .patient-status-pill.is-info{color:#075985;background:#e0f2fe}
+.app-shell-patient .patient-page article[class*="bg-[rgba(18,24,52"]{background:#f8fafc!important;border-color:#dce6ef!important}
+.app-shell-patient .patient-page article[class*="bg-slate-800"]{background:#f5f9fc!important}
+.app-shell-patient .patient-page .text-slate-300{color:#475569!important}
+.app-shell-patient .patient-page .text-slate-400{color:#64748b!important}
+.app-shell-patient .patient-page .text-slate-500{color:#718197!important}
+.app-shell-patient .patient-page [class*="border-[rgba(142,153,194"]{border-color:#dce6ef!important}
+
+/* Overview hierarchy and semantic healthcare surfaces. */
+.app-shell-patient .patient-overview{--panel:#fff;--line:#dbe5ee;--muted:#64758b;color:#15253b}
+.app-shell-patient .patient-hero{margin-bottom:1rem;padding:.25rem .1rem}
+.app-shell-patient .patient-hero h1{margin:.25rem 0 .2rem;color:#12233a;font-size:clamp(1.65rem,2.4vw,2.15rem)}
+.app-shell-patient .patient-hero p{color:#64758b}
+.app-shell-patient .patient-eyebrow{color:#5969a8;font-size:.61rem;letter-spacing:.1em}
+.app-shell-patient .patient-alert-indicator{border-color:#d7e2ec;color:#334a63;background:#fff;box-shadow:0 5px 16px rgba(31,55,83,.05)}
+.app-shell-patient .patient-alert-indicator span{color:#4338ca;background:#eef2ff}
+.app-shell-patient .patient-sos{border-color:#fecaca;color:#b4232f;background:#fff5f5}
+.app-shell-patient .patient-inline-error{border-color:#fecaca;color:#991b1b;background:#fef2f2}
+.app-shell-patient .patient-summary-card{min-height:112px;border-color:transparent;background:#fff;box-shadow:0 8px 24px rgba(31,55,83,.055)}
+.app-shell-patient .patient-summary-card.is-indigo{border-color:#ddd6fe;background:linear-gradient(145deg,#f5f3ff,#fff)}
+.app-shell-patient .patient-summary-card.is-violet{border-color:#fed7aa;background:linear-gradient(145deg,#fff7ed,#fff)}
+.app-shell-patient .patient-summary-card.is-cyan{border-color:#bae6fd;background:linear-gradient(145deg,#f0f9ff,#fff)}
+.app-shell-patient .patient-summary-card.is-amber{border-color:#99f6e4;background:linear-gradient(145deg,#f0fdfa,#fff)}
+.app-shell-patient .patient-card-icon{color:#4f46e5;background:#eae9ff}
+.app-shell-patient .patient-summary-card.is-violet .patient-card-icon{color:#b45309;background:#ffedd5}
+.app-shell-patient .patient-summary-card.is-cyan .patient-card-icon{color:#0369a1;background:#e0f2fe}
+.app-shell-patient .patient-summary-card.is-amber .patient-card-icon{color:#0f766e;background:#ccfbf1}
+.app-shell-patient .patient-summary-card span,.app-shell-patient .patient-summary-card small{color:#64758b}
+.app-shell-patient .patient-summary-card strong{color:#15253b}
+.app-shell-patient .patient-panel{border-color:#dce6ef;background:#fff;box-shadow:0 8px 24px rgba(31,55,83,.055)}
+.app-shell-patient .patient-panel-header h2{color:#16283f}
+.app-shell-patient .patient-panel-header p{color:#718197}
+.app-shell-patient .patient-panel-header a{color:#4f46e5}
+.app-shell-patient .patient-section-label{color:#5b6f86;font-size:.59rem;letter-spacing:.1em}
+.app-shell-patient .patient-med-row{position:relative;border-color:#e1e9f0;background:#f8fbfd}
+.app-shell-patient .patient-med-row:before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:3px;border-radius:3px;background:#818cf8}
+.app-shell-patient .patient-med-row:hover{border-color:#c7d2fe;background:#f7f7ff}
+.app-shell-patient .patient-med-icon,.app-shell-patient .patient-detail-icon{color:#4f46e5;background:#eeefff}
+.app-shell-patient .patient-med-info h3,.app-shell-patient .patient-detail-row strong{color:#20354f}
+.app-shell-patient .patient-med-info span,.app-shell-patient .patient-med-info p,.app-shell-patient .patient-detail-row p,.app-shell-patient .patient-detail-row span{color:#6b7d92}
+.app-shell-patient .patient-status{color:#475569;background:#edf2f7}
+.app-shell-patient .patient-status.is-taken{color:#166534;background:#dcfce7}
+.app-shell-patient .patient-status.is-missed{color:#b91c1c;background:#fee2e2}
+.app-shell-patient .patient-status.is-pending{color:#92400e;background:#fef3c7}
+.app-shell-patient .patient-dose-button{border-color:#bbf7d0;color:#166534;background:#f0fdf4}
+.app-shell-patient .patient-dose-button:hover:not(:disabled){background:#16a34a}
+.app-shell-patient .patient-dose-button:disabled{color:#64748b;background:#eef2f6}
+.app-shell-patient .patient-vitals-grid>div{background:#ecfeff}
+.app-shell-patient .patient-vitals-grid strong{color:#164e63}
+.app-shell-patient .patient-vitals-grid span{color:#567080}
+.app-shell-patient .patient-risk-panel{border-color:#ddd6fe;background:radial-gradient(circle at 100% 0%,rgba(124,58,237,.1),transparent 42%),#faf8ff}
+.app-shell-patient .patient-risk-main strong{color:#352b67}
+.app-shell-patient .patient-risk-main p,.app-shell-patient .patient-risk-factors dt{color:#6b6680}
+.app-shell-patient .patient-risk-factors{border-color:#e5def5}
+.app-shell-patient .patient-disclaimer{color:#615b76;background:#f1edfb}
+.app-shell-patient .patient-care-list>div{background:#f0fdfa}
+.app-shell-patient .patient-care-list strong{color:#1f3a45}
+.app-shell-patient .patient-empty{min-height:96px;padding:1rem;border:0;background:#f6f9fc;color:#718197}
+.app-shell-patient .patient-empty h3{color:#263b55}
+.app-shell-patient .patient-empty a{color:#4f46e5}
+.app-shell-patient .patient-empty.small{min-height:62px}
+.app-shell-patient .patient-state h1{color:#172a43}
+.app-shell-patient .patient-state p{color:#64758b}
+
+/* Feature-specific accents without changing page behavior. */
+.app-shell-patient .patient-page .bg-cyan-500\/10{background:#cffafe!important}
+.app-shell-patient .patient-page .text-cyan-300{color:#0e7490!important}
+.app-shell-patient .patient-page .bg-indigo-500\/10,.app-shell-patient .patient-page .bg-violet-500\/10{background:#ede9fe!important}
+.app-shell-patient .patient-page .text-indigo-300,.app-shell-patient .patient-page .text-violet-300{color:#5b21b6!important}
+.app-shell-patient .patient-page .bg-slate-800\/50,.app-shell-patient .patient-page .bg-slate-800\/45{background:#f1f5f9!important}
+.app-shell-patient .patient-page form + div[class*="border-t"]{border-color:#dce6ef!important}
+.app-shell-patient .patient-page .bg-slate-800\/70{background:#eef2f7!important;color:#334155!important}
+
+@media(max-width:767px){
+  .app-shell-patient .patient-page-header{align-items:flex-start}
+  .app-shell-patient .patient-section-card{padding:.85rem}
+}
