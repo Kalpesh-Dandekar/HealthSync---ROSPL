@@ -22,6 +22,10 @@ import { DoctorLayout } from "./pages/doctor/DoctorLayout";
 import { DoctorPatientList } from "./pages/doctor/DoctorPatientList";
 import { DoctorPatientDetail } from "./pages/doctor/DoctorPatientDetail";
 import { DoctorEmergencies } from "./pages/doctor/DoctorEmergencies";
+import { DoctorDashboard } from "./pages/doctor/DoctorDashboard";
+import { DoctorAppointments } from "./pages/doctor/DoctorAppointments";
+import { DoctorReports } from "./pages/doctor/DoctorReports";
+import { DoctorCareNetwork } from "./pages/doctor/DoctorCareNetwork";
 
 import { CareNetworkPage } from "./pages/shared/CareNetworkPage";
 import { AppointmentsPage } from "./pages/shared/AppointmentsPage";
@@ -133,8 +137,10 @@ export default function App() {
           <Route path="/doctor" element={<DoctorLayout />}>
             <Route
               index
-              element={<DoctorPatientList />}
+              element={<DoctorDashboard />}
             />
+
+            <Route path="patients" element={<DoctorPatientList />} />
 
             <Route
               path="patients/:id"
@@ -143,12 +149,12 @@ export default function App() {
 
             <Route
               path="appointments"
-              element={<AppointmentsPage role="doctor" />}
+              element={<DoctorAppointments />}
             />
 
             <Route
               path="reports"
-              element={<ReportsPage role="doctor" />}
+              element={<DoctorReports />}
             />
 
             <Route
@@ -156,16 +162,11 @@ export default function App() {
               element={<DoctorEmergencies />}
             />
 
-            <Route path="ai" element={<AIAssistantPage />} />
+            <Route path="ai" element={<PatientAIAssistant />} />
 
             <Route
               path="care-network"
-              element={
-                <CareNetworkPage
-                  authorName=""
-                  authorRole="doctor"
-                />
-              }
+              element={<DoctorCareNetwork />}
             />
           </Route>
 

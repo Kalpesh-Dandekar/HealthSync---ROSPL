@@ -33,4 +33,7 @@ export const roleDataApi={
  getCareNetwork:()=>request<{connections:any[]}>("/care-network"),
  getReports:()=>request<{reports:ReportRecord[]}>("/reports"),
  getEmergencies:()=>request<{emergencies:EmergencyRecord[]}>("/emergencies"),
+ addDoctorMedication:(patientId:string|number,data:{name:string;dosage:string;schedule:string;stock:number})=>request<any>(`/doctor/patients/${patientId}/medications`,{method:"POST",body:JSON.stringify(data)}),
+ addClinicalNote:(patientId:string|number,note:string)=>request<any>(`/doctor/patients/${patientId}/clinical-note`,{method:"POST",body:JSON.stringify({note})}),
+ resolveEmergency:(alertId:number)=>request<{active:boolean}>("/sos",{method:"POST",body:JSON.stringify({active:false,alertId})}),
 };
