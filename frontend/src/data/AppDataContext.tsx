@@ -55,6 +55,9 @@ interface AppDataContextValue {
   reports: ReportSummary[];
   adherenceRate: number;
   sosActive: boolean;
+  isLoading: boolean;
+  dataError: string | null;
+  refreshPatientData: () => Promise<void>;
 
   riskAssessment: {
     overall: RiskResult;
@@ -252,6 +255,10 @@ export function AppDataProvider({
   const [backendOnline, setBackendOnline] =
     useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [dataError, setDataError] = useState<string | null>(null);
+
 
   /* =======================================================
      LOAD LOGGED-IN PATIENT FROM DATABASE
@@ -352,6 +359,7 @@ export function AppDataProvider({
     setReports([]);
 
     setBackendOnline(true);
+    setDataError(null);
 
 
     localStorage.setItem(
@@ -406,27 +414,44 @@ export function AppDataProvider({
     // Reload whenever the patient route is entered so the new account
     // cannot inherit the previous patient's in-memory data.
     setBackendOnline(false);
+    setIsLoading(true);
+    setDataError(null);
     setPatient(emptyPatient());
     setMedicines([]);
     setVitals([]);
     setAppointments([]);
     setAlerts([]);
 
-    loadLivePatient().catch((error) => {
-      console.error(
-        "Patient data load error:",
-        error
-      );
+    loadLivePatient()
+      .catch((error) => {
+        console.error("Patient data load error:", error);
 
-      if (!cancelled) {
-        setBackendOnline(false);
-      }
-    });
+        if (!cancelled) {
+          setBackendOnline(false);
+          setDataError(error instanceof Error ? error.message : "Unable to load your health data.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
   }, [role, location.pathname, loadLivePatient]);
+
+  const refreshPatientData = useCallback(async () => {
+    setIsLoading(true);
+    setDataError(null);
+    try {
+      await loadLivePatient();
+    } catch (error) {
+      setBackendOnline(false);
+      setDataError(error instanceof Error ? error.message : "Unable to load your health data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadLivePatient]);
 
 
   /* =======================================================
@@ -777,6 +802,8 @@ export function AppDataProvider({
         reports,
         adherenceRate,
         sosActive,
+        isLoading,
+        dataError,
         riskAssessment,
 
         logDose,
@@ -785,6 +812,7 @@ export function AppDataProvider({
         toggleSos,
         cancelAppointment,
         bookAppointment,
+        refreshPatientData,
       }}
     >
       {children}

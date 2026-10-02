@@ -1,208 +1,82 @@
-import { AlertTriangle, BrainCircuit, CheckCircle2, Pill, ShieldCheck, TrendingUp } from "lucide-react";
-import { Card, CardHeader } from "../../components/ui/Card";
-import { Badge } from "../../components/ui/Badge";
+import { Activity, AlertCircle, AlertTriangle, Bell, BrainCircuit, CalendarDays, Check, CheckCircle2, ChevronRight, HeartPulse, Pill, RefreshCw, ShieldCheck, Stethoscope, UserRound } from "lucide-react";
+import { Link } from "react-router-dom";
 import { AdherenceRing } from "../../components/ui/AdherenceRing";
 import { RiskBadge } from "../../components/ui/RiskBadge";
 import { useAppData } from "../../data/AppDataContext";
 import type { DoseEvent } from "../../types";
+import "./patient-dashboard.css";
 
-function doseStatusBadge(status: DoseEvent["status"], takenAt?: string) {
-  if (status === "taken")
-    return (
-      <Badge tone="sage" icon={<CheckCircle2 className="h-3 w-3" />}>
-        Taken {takenAt}
-      </Badge>
-    );
-  if (status === "pending") return <Badge tone="gold">Pending</Badge>;
-  if (status === "missed") return <Badge tone="brick">Missed</Badge>;
-  return <Badge tone="neutral">Scheduled</Badge>;
+function doseLabel(status: DoseEvent["status"], takenAt?: string) {
+  if (status === "taken") return takenAt ? `Taken ${takenAt}` : "Taken";
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
-function riskLabel(band: "low" | "medium" | "high") {
-  return band === "high" ? "High risk" : band === "medium" ? "Moderate risk" : "Low risk";
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
 }
 
 export function PatientDashboard() {
-  const {
-    patient,
-    medicines,
-    alerts,
-    adherenceRate,
-    logDose,
-    sosActive,
-    toggleSos,
-    riskAssessment,
-  } = useAppData();
-
+  const { patient, medicines, alerts, appointments, vitals, adherenceRate, logDose, sosActive, toggleSos, riskAssessment, isLoading, dataError, refreshPatientData } = useAppData();
   const riskPercent = Math.round(riskAssessment.overall.score * 100);
-  const topRisk = [...riskAssessment.perMedicine].sort(
-    (a, b) => b.risk.score - a.risk.score,
-  )[0];
+  const topRisk = [...riskAssessment.perMedicine].sort((a, b) => b.risk.score - a.risk.score)[0];
+  const activeAlerts = alerts.filter((alert) => !alert.acknowledged);
+  const upcomingAppointments = appointments.filter((appointment) => appointment.status === "upcoming");
+  const nextAppointment = [...upcomingAppointments].sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))[0];
+  const latestVital = vitals[0];
+  const missed = medicines.reduce((count, medicine) => count + medicine.doses.filter((dose) => dose.status === "missed").length, 0);
+  const pending = medicines.reduce((count, medicine) => count + medicine.doses.filter((dose) => dose.status === "pending" || dose.status === "scheduled").length, 0);
+  const lowStock = medicines.filter((medicine) => medicine.stock <= medicine.lowStockThreshold).length;
+  const connectedCareMembers = [patient.primaryCaregiver, patient.physician].filter((name) => name && name !== "Not connected");
+  const firstName = patient.name.trim().split(" ")[0] || "there";
 
-  const missed = medicines.reduce(
-    (count, medicine) => count + medicine.doses.filter((d) => d.status === "missed").length,
-    0,
-  );
-  const pending = medicines.reduce(
-    (count, medicine) => count + medicine.doses.filter((d) => d.status === "pending").length,
-    0,
-  );
-  const lowStock = medicines.filter((m) => m.stock <= m.lowStockThreshold).length;
+  if (!patient.id && (isLoading || !dataError)) return <div className="patient-overview patient-state" role="status"><RefreshCw className="h-7 w-7 animate-spin" /><div><h1>Preparing your workspace</h1><p>Loading your current health data securely.</p></div></div>;
+  if (dataError && !patient.id) return <div className="patient-overview patient-state patient-state-error" role="alert"><AlertCircle className="h-7 w-7" /><div className="flex-1"><h1>We couldn’t load your workspace</h1><p>{dataError}</p></div><button onClick={() => void refreshPatientData()}><RefreshCw className="h-4 w-4" /> Try again</button></div>;
 
-  return (
-    <div className="patient-dashboard screen-page flex min-h-0 flex-col gap-3 overflow-hidden">
-      <div className="dashboard-header flex shrink-0 items-center justify-between gap-3">
-        <div>
-          <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-ink-700/20 bg-ink-100 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-ink-500">
-            <TrendingUp className="h-3.5 w-3.5" /> Patient overview
+  return <div className="patient-overview">
+    <header className="patient-hero">
+      <div><div className="patient-eyebrow"><ShieldCheck className="h-3.5 w-3.5" /> Secure patient workspace</div><h1>{greeting()}, {firstName}</h1><p>Here’s your health overview for today.</p></div>
+      <div className="patient-header-actions"><div className="patient-alert-indicator" aria-label={`${activeAlerts.length} active alerts`}><Bell className="h-4 w-4" /><span>{activeAlerts.length}</span></div><button onClick={toggleSos} className={`patient-sos ${sosActive ? "is-active" : ""}`}><AlertTriangle className="h-4 w-4" />{sosActive ? "SOS active" : "Emergency SOS"}</button></div>
+    </header>
+
+    {dataError && <div className="patient-inline-error" role="alert"><AlertCircle className="h-4 w-4" /> Some data may be out of date. {dataError}<button onClick={() => void refreshPatientData()}>Retry</button></div>}
+
+    <section className="patient-summary-grid" aria-label="Health summary">
+      <article className="patient-summary-card is-indigo"><div className="patient-card-icon"><Activity /></div><div><span>Today’s adherence</span><strong>{medicines.length ? `${adherenceRate}%` : "—"}</strong></div><small>{medicines.length ? (adherenceRate >= 80 ? "On track" : "Needs attention") : "No medications yet"}</small></article>
+      <article className="patient-summary-card is-violet"><div className="patient-card-icon"><BrainCircuit /></div><div><span>Risk signal</span><strong>{medicines.length ? `${riskPercent}%` : "—"}</strong></div><small>{medicines.length ? `${riskAssessment.overall.band} adherence risk` : "Awaiting medication data"}</small></article>
+      <article className="patient-summary-card is-cyan"><div className="patient-card-icon"><CalendarDays /></div><div><span>Upcoming visits</span><strong>{upcomingAppointments.length}</strong></div><small>{nextAppointment ? `${nextAppointment.date} · ${nextAppointment.time}` : "No visits scheduled"}</small></article>
+      <article className="patient-summary-card is-amber"><div className="patient-card-icon"><AlertCircle /></div><div><span>Needs attention</span><strong>{pending + missed + lowStock}</strong></div><small>{missed} missed · {pending} due · {lowStock} low stock</small></article>
+    </section>
+
+    <div className="patient-content-grid">
+      <main className="patient-primary-column">
+        <section className="patient-panel patient-medications">
+          <div className="patient-panel-header"><div><span className="patient-section-label">Medication schedule</span><h2>Today’s medications</h2><p>Log a dose when you take it to keep your care team current.</p></div><Link to="/patient/add-data">Manage <ChevronRight className="h-4 w-4" /></Link></div>
+          <div className="patient-med-list">
+            {medicines.map((medicine) => { const dose = medicine.doses[0]; const canLog = dose && dose.status !== "taken"; return <article key={medicine.id} className="patient-med-row">
+              <div className="patient-med-icon"><Pill className="h-5 w-5" /></div><div className="patient-med-info"><div><h3>{medicine.name}</h3><span>{medicine.dosage}</span></div><p>{dose?.time || medicine.frequency} · {medicine.frequency}</p></div>
+              <span className={`patient-status is-${dose?.status || "scheduled"}`}>{doseLabel(dose?.status || "scheduled", dose?.takenAt)}</span><div className="patient-stock"><span>Stock</span><strong>{medicine.stock}</strong></div>
+              <button disabled={!canLog} onClick={() => dose && logDose(medicine.id, dose.id)} className="patient-dose-button">{canLog ? <><CheckCircle2 className="h-4 w-4" /> Mark taken</> : <><Check className="h-4 w-4" /> Logged</>}</button>
+            </article>; })}
+            {!medicines.length && <div className="patient-empty"><Pill className="h-6 w-6" /><h3>No medications added</h3><p>Add your medications to see today’s schedule and adherence.</p><Link to="/patient/add-data">Add medication</Link></div>}
           </div>
-          <h1 className="text-xl font-semibold tracking-tight text-charcoal-900 sm:text-2xl">
-            Good morning, {patient.name.split(" ")[0]}
-          </h1>
-          <p className="mt-0.5 text-xs text-charcoal-500">
-            Your medication plan, care network and AI adherence insight are up to date.
-          </p>
+        </section>
+
+        <div className="patient-lower-grid">
+          <section className="patient-panel compact"><div className="patient-panel-header"><div><span className="patient-section-label">Schedule</span><h2>Next appointment</h2></div><Link to="/patient/appointments">View all</Link></div>{nextAppointment ? <div className="patient-detail-row"><div className="patient-detail-icon"><CalendarDays /></div><div><strong>{nextAppointment.reason}</strong><p>{nextAppointment.withName}</p><span>{nextAppointment.date} · {nextAppointment.time}</span></div></div> : <div className="patient-empty small"><CalendarDays /><p>No upcoming appointments.</p><Link to="/patient/add-data">Book a visit</Link></div>}</section>
+          <section className="patient-panel compact"><div className="patient-panel-header"><div><span className="patient-section-label">Latest reading</span><h2>Vitals snapshot</h2></div><Link to="/patient/vitals">History</Link></div>{latestVital ? <div className="patient-vitals-grid"><div><HeartPulse /><strong>{latestVital.heartRate || "—"}</strong><span>bpm</span></div><div><Activity /><strong>{latestVital.bpSys || "—"}/{latestVital.bpDia || "—"}</strong><span>mmHg</span></div><div><span className="patient-glucose">G</span><strong>{latestVital.glucose || "—"}</strong><span>glucose</span></div></div> : <div className="patient-empty small"><HeartPulse /><p>No vital readings yet.</p><Link to="/patient/add-data">Log vitals</Link></div>}</section>
         </div>
-        <button
-          onClick={toggleSos}
-          className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all ${
-            sosActive
-              ? "bg-brick-600 text-white shadow-lg shadow-brick-600/20"
-              : "border border-brick-600/30 bg-brick-100 text-brick-700 hover:border-brick-600/50"
-          }`}
-        >
-          <AlertTriangle className="h-4 w-4" />
-          {sosActive ? "Emergency alert sent" : "Emergency SOS"}
-        </button>
-      </div>
+      </main>
 
-      <div className="dashboard-stats grid shrink-0 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-        <Card className="dashboard-stat-card p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-charcoal-500">Today's adherence</p>
-          <div className="mt-2 flex items-end justify-between gap-2">
-            <p className="text-2xl font-semibold tracking-tight text-charcoal-900">{adherenceRate}%</p>
-            <Badge tone={adherenceRate >= 80 ? "sage" : "gold"}>{adherenceRate >= 80 ? "On track" : "Needs attention"}</Badge>
-          </div>
-          <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-paper-200">
-            <div className="h-full rounded-full bg-ink-700 transition-all" style={{ width: `${adherenceRate}%` }} />
-          </div>
-        </Card>
-
-        <Card className="dashboard-stat-card p-3">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-charcoal-500">AI risk signal</p>
-              <p className="mt-3 text-3xl font-semibold tracking-tight text-charcoal-900">{riskPercent}%</p>
-            </div>
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-100 text-ink-600">
-              <BrainCircuit className="h-5 w-5" />
-            </span>
-          </div>
-          <div className="mt-2"><RiskBadge risk={riskAssessment.overall} showModel /></div>
-        </Card>
-
-        <Card className="dashboard-stat-card p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-charcoal-500">Needs attention</p>
-          <div className="mt-3 flex items-end gap-3">
-            <p className="text-2xl font-semibold tracking-tight text-charcoal-900">{pending + missed}</p>
-            <span className="pb-1 text-xs text-charcoal-500">dose signals</span>
-          </div>
-          <p className="mt-2 text-xs text-charcoal-500">{pending} pending · {missed} missed · {lowStock} low stock</p>
-        </Card>
-
-        <Card className="dashboard-stat-card p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-charcoal-500">Care network</p>
-          <p className="mt-2 text-base font-semibold text-charcoal-900">Connected</p>
-          <p className="mt-1 text-xs text-charcoal-500">Caregiver + physician can see adherence updates.</p>
-        </Card>
-      </div>
-
-      <div className="dashboard-main min-h-0 flex-1 grid gap-2 overflow-hidden xl:grid-cols-[1.45fr_.75fr]">
-        <Card className="dashboard-medicines min-h-0 overflow-hidden">
-          <CardHeader
-            title="Today's medicines"
-            subtitle="Log each dose as you take it. Changes recalculate the AI risk signal."
-          />
-          <div className="min-h-0 space-y-2 overflow-hidden">
-            {medicines.map((med) => {
-              const nextDose = med.doses.find((d) => d.status !== "taken");
-              return (
-                <div key={med.id} className="flex min-h-[78px] items-center gap-3 rounded-xl border border-paper-200 bg-paper-50 px-3 py-2.5 transition-colors hover:border-ink-700/30">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink-100 text-ink-600">
-                      <Pill className="h-4.5 w-4.5" />
-                    </span>
-                    <div>
-                      <p className="font-semibold text-charcoal-900">{med.name} <span className="text-xs font-normal text-charcoal-500">{med.dosage}</span></p>
-                      <p className="mt-0.5 text-xs text-charcoal-500">{med.compartment} · Stock: {med.stock}</p>
-                      <div className="mt-1 flex flex-wrap gap-1.5">
-                        {med.doses.map((d) => <span key={d.id}>{doseStatusBadge(d.status, d.takenAt)}</span>)}
-                      </div>
-                    </div>
-                  </div>
-                  {nextDose && (
-                    <button onClick={() => logDose(med.id, nextDose.id)} className="ml-auto flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-ink-700/40 bg-ink-100 px-3 py-2 text-[11px] font-semibold text-ink-500 transition-all hover:bg-ink-800 hover:text-white">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Mark taken
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        <div className="dashboard-side min-h-0 grid grid-rows-[1fr_auto] gap-2 overflow-hidden">
-          <Card className="min-h-0 overflow-hidden border-ink-700/20 bg-[radial-gradient(circle_at_top_right,rgba(53,173,124,.12),transparent_42%),#0d1012] p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-ink-100 text-ink-600"><BrainCircuit className="h-4.5 w-4.5" /></span>
-                  <div>
-                    <p className="text-sm font-semibold text-charcoal-900">AI adherence insight</p>
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-charcoal-500">Browser ML prototype</p>
-                  </div>
-                </div>
-              </div>
-              <RiskBadge risk={riskAssessment.overall} />
-            </div>
-
-            <div className="mt-3 flex items-center gap-4">
-              <AdherenceRing percent={riskPercent} size={82} label="risk score" mode="risk" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-charcoal-900">{riskLabel(riskAssessment.overall.band)}</p>
-                <p className="mt-1 text-xs leading-5 text-charcoal-500">
-                  The model estimates the likelihood of a future missed dose from recent medication behavior.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-3 space-y-1.5 border-t border-paper-200 pt-3 text-xs">
-              <div className="flex justify-between"><span className="text-charcoal-500">Missed doses</span><span className="font-medium text-charcoal-900">{missed}</span></div>
-              <div className="flex justify-between"><span className="text-charcoal-500">Pending doses</span><span className="font-medium text-gold-500">{pending}</span></div>
-              <div className="flex justify-between"><span className="text-charcoal-500">Low-stock medicines</span><span className="font-medium text-charcoal-900">{lowStock}</span></div>
-              <div className="flex justify-between"><span className="text-charcoal-500">Highest-risk medicine</span><span className="font-medium text-charcoal-900">{topRisk?.medicine.name ?? "—"}</span></div>
-            </div>
-
-            <div className="mt-3 flex items-start gap-2 rounded-xl border border-ink-700/20 bg-ink-100/60 p-2.5">
-              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-ink-600" />
-              <p className="text-[11px] leading-5 text-charcoal-500">Decision-support prototype only. It does not diagnose conditions or replace medical advice.</p>
-            </div>
-          </Card>
-
-          <Card className="min-h-0 overflow-hidden p-4">
-            <CardHeader title="Alerts" subtitle="Signals your care team may need to review" />
-            <div className="space-y-1.5">
-              {alerts.filter((a) => !a.acknowledged).map((a) => (
-                <div key={a.id} className="rounded-xl border border-paper-200 bg-paper-50 p-2.5">
-                  <Badge tone={a.severity === "critical" ? "brick" : "gold"}>{a.type === "missed_dose" ? "Missed dose" : "Low stock"}</Badge>
-                  <p className="mt-2 text-xs leading-relaxed text-charcoal-700">{a.message}</p>
-                </div>
-              ))}
-              {alerts.filter((a) => !a.acknowledged).length === 0 && <p className="text-sm text-charcoal-500">No active alerts.</p>}
-            </div>
-          </Card>
-        </div>
-      </div>
+      <aside className="patient-secondary-column">
+        <section className="patient-panel patient-risk-panel"><div className="patient-panel-header"><div><span className="patient-section-label">Decision support</span><h2>AI adherence insight</h2></div>{medicines.length > 0 && <RiskBadge risk={riskAssessment.overall} />}</div>
+          {medicines.length ? <><div className="patient-risk-main"><AdherenceRing percent={riskPercent} size={94} label="risk score" mode="risk" /><div><strong>{riskAssessment.overall.band === "high" ? "High risk" : riskAssessment.overall.band === "medium" ? "Moderate risk" : "Low risk"}</strong><p>The model estimates future missed-dose likelihood from your current medication behavior.</p></div></div><dl className="patient-risk-factors"><div><dt>Missed doses</dt><dd>{missed}</dd></div><div><dt>Pending doses</dt><dd>{pending}</dd></div><div><dt>Low stock</dt><dd>{lowStock}</dd></div><div><dt>Highest-risk medication</dt><dd>{topRisk?.medicine.name || "—"}</dd></div></dl></> : <div className="patient-empty small"><BrainCircuit /><p>Add medication data to generate an adherence risk insight.</p></div>}
+          <div className="patient-disclaimer"><ShieldCheck className="h-4 w-4" /><p>Decision-support prototype only. It does not diagnose conditions or replace medical advice.</p></div>
+        </section>
+        <section className="patient-panel compact"><div className="patient-panel-header"><div><span className="patient-section-label">Connected care</span><h2>Care network</h2></div><Link to="/patient/care-network">Manage</Link></div><div className="patient-care-list"><div><span><UserRound /></span><p><small>Caregiver</small><strong>{patient.primaryCaregiver}</strong></p></div><div><span><Stethoscope /></span><p><small>Physician</small><strong>{patient.physician}</strong></p></div></div>{!connectedCareMembers.length && <p className="patient-muted-note">No care-team connections are active yet.</p>}</section>
+      </aside>
     </div>
-  );
+  </div>;
 }

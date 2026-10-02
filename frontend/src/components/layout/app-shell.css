@@ -1,0 +1,35 @@
+.app-shell {
+  background: #050713;
+  color: #f7f8ff;
+}
+
+.app-sidebar,
+.app-drawer,
+.app-mobile-header {
+  border-color: rgba(139, 151, 191, 0.14);
+  background: rgba(8, 11, 27, 0.96);
+  box-shadow: 20px 0 70px rgba(0, 0, 0, 0.24);
+}
+
+.app-brand,
+.app-profile { border-color: rgba(139, 151, 191, 0.14); }
+.app-brand-mark { background: linear-gradient(145deg, #4f46e5, #7c3aed 58%, #0891b2); box-shadow: 0 10px 30px rgba(79, 70, 229, .3); }
+.app-kicker,
+.app-muted { color: #8f99b7; }
+.app-workspace,
+.app-user { border: 1px solid rgba(139, 151, 191, .13); background: rgba(18, 23, 49, .7); }
+.app-live { color: #67e8f9; }
+.app-nav-link { color: #aeb7d1; }
+.app-nav-link:hover { color: #fff; background: rgba(99, 102, 241, .1); }
+.app-nav-link.is-active { color: #fff; background: linear-gradient(90deg, rgba(79, 70, 229, .28), rgba(124, 58, 237, .12)); box-shadow: inset 3px 0 #818cf8; }
+.app-nav-icon { color: #8792b2; background: rgba(139, 151, 191, .08); }
+.app-nav-link.is-active .app-nav-icon { color: #c7d2fe; background: rgba(99, 102, 241, .24); }
+.app-avatar { color: #c7d2fe; background: rgba(99, 102, 241, .18); border: 1px solid rgba(129, 140, 248, .22); }
+.app-logout { color: #8f99b7; }
+.app-logout:hover { color: #fff; background: rgba(139, 151, 191, .08); }
+.app-menu-button { color: #cbd5f0; border: 1px solid rgba(139, 151, 191, .16); background: rgba(18, 23, 49, .75); }
+.app-ambient { background: radial-gradient(circle at 72% 0%, rgba(79, 70, 229, .13), transparent 34%), radial-gradient(circle at 100% 75%, rgba(8, 145, 178, .07), transparent 28%); }
+
+@media (max-width: 1023px) {
+  .app-shell { min-height: 100vh; height: auto; overflow: visible; }
+}
