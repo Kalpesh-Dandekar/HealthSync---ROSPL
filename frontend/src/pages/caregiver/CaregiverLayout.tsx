@@ -4,19 +4,21 @@ import {
   Bot,
   Calendar,
   ClipboardList,
+  AlertTriangle,
   LayoutDashboard,
   Users,
 } from "lucide-react";
 import { AppShell, type NavItem } from "../../components/layout/AppShell";
 
 const navItems: NavItem[] = [
-  { to: "/caregiver", label: "Dashboard", icon: LayoutDashboard, end: true },
-  { to: "/caregiver/patients", label: "Patients", icon: Users },
-  { to: "/caregiver/ai", label: "AI Assistant", icon: Bot },
-  { to: "/caregiver/alerts", label: "Alerts", icon: Bell },
-  { to: "/caregiver/appointments", label: "Appointments", icon: Calendar },
-  { to: "/caregiver/reports", label: "Reports", icon: ClipboardList },
-  { to: "/caregiver/care-network", label: "Care Network", icon: Users },
+  { to: "/caregiver", label: "Overview", icon: LayoutDashboard, end: true, group: "Care workspace" },
+  { to: "/caregiver/patients", label: "Patients", icon: Users, group: "Care workspace" },
+  { to: "/caregiver/alerts", label: "Alerts", icon: Bell, group: "Care workspace" },
+  { to: "/caregiver/appointments", label: "Appointments", icon: Calendar, group: "Care workspace" },
+  { to: "/caregiver/reports", label: "Reports", icon: ClipboardList, group: "Care workspace" },
+  { to: "/caregiver/ai", label: "AI Assistant", icon: Bot, group: "Care tools" },
+  { to: "/caregiver/care-network", label: "Care Network", icon: Users, group: "Care tools" },
+  { to: "/caregiver/emergencies", label: "Emergencies", icon: AlertTriangle, group: "Emergency" },
 ];
 
 export function CaregiverLayout() {

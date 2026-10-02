@@ -36,4 +36,6 @@ export const roleDataApi={
  addDoctorMedication:(patientId:string|number,data:{name:string;dosage:string;schedule:string;stock:number})=>request<any>(`/doctor/patients/${patientId}/medications`,{method:"POST",body:JSON.stringify(data)}),
  addClinicalNote:(patientId:string|number,note:string)=>request<any>(`/doctor/patients/${patientId}/clinical-note`,{method:"POST",body:JSON.stringify({note})}),
  resolveEmergency:(alertId:number)=>request<{active:boolean}>("/sos",{method:"POST",body:JSON.stringify({active:false,alertId})}),
+ addCareObservation:(patientId:string|number,note:string)=>request<any>(`/caregiver/patients/${patientId}/observation`,{method:"POST",body:JSON.stringify({note})}),
+ bookForPatient:(patientId:string|number,data:{title:string;doctor:string;date:string;time:string})=>request<any>("/appointments",{method:"POST",body:JSON.stringify({...data,patientId:Number(patientId)})}),
 };

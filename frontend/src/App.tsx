@@ -17,6 +17,10 @@ import { PatientCareNetwork } from "./pages/patient/PatientCareNetwork";
 import { CaregiverLayout } from "./pages/caregiver/CaregiverLayout";
 import { CaregiverDashboard } from "./pages/caregiver/CaregiverDashboard";
 import { CaregiverAlerts } from "./pages/caregiver/CaregiverAlerts";
+import { CaregiverAppointments } from "./pages/caregiver/CaregiverAppointments";
+import { CaregiverReports } from "./pages/caregiver/CaregiverReports";
+import { CaregiverCareNetwork } from "./pages/caregiver/CaregiverCareNetwork";
+import { CaregiverEmergencies } from "./pages/caregiver/CaregiverEmergencies";
 
 import { DoctorLayout } from "./pages/doctor/DoctorLayout";
 import { DoctorPatientList } from "./pages/doctor/DoctorPatientList";
@@ -27,10 +31,6 @@ import { DoctorAppointments } from "./pages/doctor/DoctorAppointments";
 import { DoctorReports } from "./pages/doctor/DoctorReports";
 import { DoctorCareNetwork } from "./pages/doctor/DoctorCareNetwork";
 
-import { CareNetworkPage } from "./pages/shared/CareNetworkPage";
-import { AppointmentsPage } from "./pages/shared/AppointmentsPage";
-import { ReportsPage } from "./pages/shared/ReportsPage";
-import { AIAssistantPage } from "./pages/shared/AIAssistantPage";
 import { CaregiverPatients } from "./pages/caregiver/CaregiverPatients";
 import { CaregiverPatientDetail } from "./pages/caregiver/CaregiverPatientDetail";
 
@@ -112,25 +112,22 @@ export default function App() {
 
             <Route
               path="appointments"
-              element={<AppointmentsPage role="caregiver" />}
+              element={<CaregiverAppointments />}
             />
 
             <Route
               path="reports"
-              element={<ReportsPage role="caregiver" />}
+              element={<CaregiverReports />}
             />
 
-            <Route path="ai" element={<AIAssistantPage />} />
+            <Route path="ai" element={<PatientAIAssistant />} />
 
             <Route
               path="care-network"
-              element={
-                <CareNetworkPage
-                  authorName=""
-                  authorRole="caregiver"
-                />
-              }
+              element={<CaregiverCareNetwork />}
             />
+
+            <Route path="emergencies" element={<CaregiverEmergencies />} />
           </Route>
 
           {/* DOCTOR */}
