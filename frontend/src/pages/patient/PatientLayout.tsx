@@ -4,7 +4,7 @@ import { AppShell, type NavItem } from "../../components/layout/AppShell";
 import { useAppData } from "../../data/AppDataContext";
 const navItems:NavItem[]=[
  {to:"/patient",label:"Overview",icon:LayoutDashboard,end:true,group:"My health"},
- {to:"/patient/add-data",label:"Medications & data",icon:Pill,group:"My health"},
+ {to:"/patient/add-data",label:"Medications",icon:Pill,group:"My health"},
  {to:"/patient/appointments",label:"Appointments",icon:Calendar,group:"My health"},
  {to:"/patient/vitals",label:"Vitals",icon:HeartPulse,group:"My health"},
  {to:"/patient/records",label:"Records",icon:FileText,group:"Health intelligence"},

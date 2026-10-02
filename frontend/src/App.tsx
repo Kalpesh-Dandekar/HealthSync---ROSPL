@@ -9,6 +9,10 @@ import { PatientDashboard } from "./pages/patient/PatientDashboard";
 import { PatientVitals } from "./pages/patient/PatientVitals";
 import { PatientRecords } from "./pages/patient/PatientRecords";
 import { PatientAddData } from "./pages/patient/PatientAddData";
+import { PatientAppointments } from "./pages/patient/PatientAppointments";
+import { PatientReports } from "./pages/patient/PatientReports";
+import { PatientAIAssistant } from "./pages/patient/PatientAIAssistant";
+import { PatientCareNetwork } from "./pages/patient/PatientCareNetwork";
 
 import { CaregiverLayout } from "./pages/caregiver/CaregiverLayout";
 import { CaregiverDashboard } from "./pages/caregiver/CaregiverDashboard";
@@ -59,12 +63,12 @@ export default function App() {
 
             <Route
               path="appointments"
-              element={<AppointmentsPage role="patient" />}
+              element={<PatientAppointments />}
             />
 
             <Route
               path="reports"
-              element={<ReportsPage role="patient" />}
+              element={<PatientReports />}
             />
 
             <Route
@@ -72,16 +76,11 @@ export default function App() {
               element={<PatientRecords />}
             />
 
-            <Route path="ai" element={<AIAssistantPage />} />
+            <Route path="ai" element={<PatientAIAssistant />} />
 
             <Route
               path="care-network"
-              element={
-                <CareNetworkPage
-                  authorName=""
-                  authorRole="patient"
-                />
-              }
+              element={<PatientCareNetwork />}
             />
           </Route>
 
