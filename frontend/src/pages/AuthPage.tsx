@@ -1,179 +1,124 @@
 /// <reference types="vite/client" />
-import { FormEvent, useState } from "react";
-import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, Eye, EyeOff, HeartPulse, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { type FormEvent, type InputHTMLAttributes, type ReactNode, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Activity,
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  Eye,
+  EyeOff,
+  HeartPulse,
+  LockKeyhole,
+  Mail,
+  Pill,
+  ShieldCheck,
+  Stethoscope,
+  Users,
+  UserRound,
+} from "lucide-react";
+import "./auth.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
 type AuthMode = "login" | "signup";
+type Role = "PATIENT" | "CAREGIVER" | "PHYSICIAN";
+type FieldErrors = Partial<Record<"name" | "email" | "password" | "confirmPassword", string>>;
+
+const roleOptions = [
+  { value: "PATIENT", label: "Patient", description: "Manage medications, appointments and health records.", icon: UserRound, tone: "cyan" },
+  { value: "PHYSICIAN", label: "Doctor", description: "Coordinate appointments, prescriptions and patient care.", icon: Stethoscope, tone: "blue" },
+  { value: "CAREGIVER", label: "Caregiver", description: "Support linked patients with adherence visibility and alerts.", icon: Users, tone: "violet" },
+] as const;
+
+function Brand() {
+  return <Link className="auth-brand" to="/" aria-label="HealthSync home"><span className="auth-brand-mark"><HeartPulse /></span><span>Health<span>Sync</span></span></Link>;
+}
+
+function AuthInput({ id, label, icon, error, ...props }: { id: string; label: string; icon: ReactNode; error?: string } & InputHTMLAttributes<HTMLInputElement>) {
+  const errorId = `${id}-error`;
+  return <div className="auth-field"><label htmlFor={id}>{label}</label><div className={`auth-input-wrap ${error ? "has-error" : ""}`}><span className="auth-input-icon" aria-hidden="true">{icon}</span><input id={id} aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} {...props} /></div>{error && <span className="auth-field-error" id={errorId}>{error}</span>}</div>;
+}
+
+function PasswordInput({ id, label, value, onChange, error, autoComplete, show, onToggle }: { id: string; label: string; value: string; onChange: (value: string) => void; error?: string; autoComplete: string; show: boolean; onToggle: () => void }) {
+  const errorId = `${id}-error`;
+  return <div className="auth-field"><label htmlFor={id}>{label}</label><div className={`auth-input-wrap ${error ? "has-error" : ""}`}><span className="auth-input-icon" aria-hidden="true"><LockKeyhole /></span><input id={id} value={value} onChange={(event) => onChange(event.target.value)} type={show ? "text" : "password"} required minLength={6} autoComplete={autoComplete} placeholder="Enter at least 6 characters" aria-invalid={Boolean(error)} aria-describedby={error ? errorId : undefined} /><button className="password-toggle" type="button" onClick={onToggle} aria-label={show ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`} aria-pressed={show}>{show ? <EyeOff /> : <Eye />}</button></div>{error && <span className="auth-field-error" id={errorId}>{error}</span>}</div>;
+}
+
+function AuthBrandPanel() {
+  return <aside className="auth-brand-panel"><Brand /><div className="auth-brand-copy"><span className="auth-kicker"><ShieldCheck /> Your HealthSync workspace</span><h1>Care stays<br /><span>connected.</span></h1><p>Bring medications, appointments, health records and care coordination into one focused workspace.</p></div><div className="care-status-card"><div className="care-status-heading"><div><span>Care status</span><strong>Today&apos;s overview</strong></div><span className="connected-status"><i /> Connected</span></div><div className="care-status-list"><div><span className="care-status-icon status-indigo"><Pill /></span><span><small>Medication</small><strong>Metformin · 8:00 AM</strong></span><span className="status-done"><Check /> Taken</span></div><div><span className="care-status-icon status-blue"><CalendarDays /></span><span><small>Next appointment</small><strong>Today · 10:30 AM</strong></span><ArrowRight /></div><div><span className="care-status-icon status-violet"><Users /></span><span><small>Care team</small><strong>Doctor & caregiver</strong></span><span className="status-online"><i /> Online</span></div></div></div><p className="auth-brand-foot"><Activity /> Connected care, made clear.</p></aside>;
+}
+
+function RoleSelector({ role, onChange, compact }: { role: Role; onChange: (role: Role) => void; compact: boolean }) {
+  return <fieldset className={`auth-role-fieldset ${compact ? "is-compact" : ""}`}><legend>{compact ? "Workspace role" : "Choose your role"}</legend><div className="auth-role-options">{roleOptions.map((option) => <button className={`auth-role-option role-${option.tone} ${role === option.value ? "is-selected" : ""}`} type="button" aria-pressed={role === option.value} onClick={() => onChange(option.value)} key={option.value}><span className="auth-role-icon"><option.icon /></span><span><strong>{option.label}</strong>{!compact && <small>{option.description}</small>}</span>{role === option.value && <Check className="role-check" />}</button>)}</div>{compact && <p>The server verifies the selected role before sign-in.</p>}</fieldset>;
+}
 
 export function AuthPage({ mode }: { mode: AuthMode }) {
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const isLogin = mode === "login";
-  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState(() => {
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [role, setRole] = useState<Role>(() => {
     const selected = (searchParams.get("role") || "PATIENT").toUpperCase();
-    return ["PATIENT", "CAREGIVER", "PHYSICIAN"].includes(selected) ? selected : "PATIENT";
+    return (["PATIENT", "CAREGIVER", "PHYSICIAN"] as const).includes(selected as Role) ? selected as Role : "PATIENT";
   });
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const roleOptions = [
-    { value: "PATIENT", label: "Patient" },
-    { value: "CAREGIVER", label: "Caregiver" },
-    { value: "PHYSICIAN", label: "Physician" },
-  ] as const;
-  const [message, setMessage] = useState("");
+  function validate() {
+    const nextErrors: FieldErrors = {};
+    if (!isLogin && !name.trim()) nextErrors.name = "Enter your full name.";
+    if (!email.trim()) nextErrors.email = "Enter your email address.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) nextErrors.email = "Enter a valid email address.";
+    if (password.length < 6) nextErrors.password = "Password must contain at least 6 characters.";
+    if (!isLogin && password !== confirmPassword) nextErrors.confirmPassword = "Passwords do not match.";
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
 
-  async function handleSubmit(event: FormEvent) {
+  function clearError(field: keyof FieldErrors) {
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
+    if (!validate()) return;
     setBusy(true);
 
     try {
-      if (isLogin) {
-        const response = await fetch(`${API_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password, role }),
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "Invalid email or password");
+      const response = await fetch(`${API_URL}/auth/${isLogin ? "login" : "signup"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(isLogin ? { email, password, role } : { name, email, password, role }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || (isLogin ? "Incorrect email or password." : "Unable to create the account."));
 
-        localStorage.setItem("healthsync_token", data.token);
-        localStorage.setItem("healthsync_role", data.user.role);
-        localStorage.setItem("healthsync_user", JSON.stringify(data.user));
-        navigate(`/${data.user.role}`);
-      } else {
-        const response = await fetch(`${API_URL}/auth/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password, role }),
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.message || "Unable to create account");
-
-        localStorage.setItem("healthsync_token", data.token);
-        localStorage.setItem("healthsync_role", data.user.role);
-        localStorage.setItem("healthsync_user", JSON.stringify(data.user));
-        navigate(`/${data.user.role}`);
-      }
+      localStorage.setItem("healthsync_token", data.token);
+      localStorage.setItem("healthsync_role", data.user.role);
+      localStorage.setItem("healthsync_user", JSON.stringify(data.user));
+      navigate(`/${data.user.role}`);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Unable to complete the request.");
+      setMessage(error instanceof TypeError ? "Unable to connect to HealthSync. Please try again." : error instanceof Error ? error.message : "Unable to complete the request.");
     } finally {
       setBusy(false);
     }
   }
 
-  return (
-    <div className="cv-grid flex min-h-screen items-center justify-center bg-paper-50 px-4 py-6 text-charcoal-900 sm:px-6">
-      <div className="w-full max-w-5xl">
-        <div className="mb-6 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="flex items-center gap-3 text-left">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-800 text-white shadow-lg shadow-ink-800/20">
-              <HeartPulse className="h-5 w-5" />
-            </span>
-            <span>
-              <span className="block text-[15px] font-bold tracking-tight">HealthSync</span>
-              <span className="block text-[9px] font-semibold uppercase tracking-[0.18em] text-charcoal-500">Intelligent connected care</span>
-            </span>
-          </button>
-          <Link to={isLogin ? `/signup?role=${role.toLowerCase()}` : `/login?role=${role.toLowerCase()}`} className="text-xs font-semibold text-charcoal-500 transition hover:text-ink-500">
-            {isLogin ? "Create account" : "Already have an account? Log in"}
-          </Link>
-        </div>
+  const switchPath = `${isLogin ? "/signup" : "/login"}?role=${role.toLowerCase()}`;
 
-        <div className="grid overflow-hidden rounded-3xl border border-paper-200 bg-paper-0 shadow-2xl shadow-black/30 lg:grid-cols-[.85fr_1.15fr]">
-          <section className="hidden border-r border-paper-200 bg-paper-50 p-8 lg:flex lg:flex-col lg:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-ink-700/25 bg-ink-100 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-ink-500">
-                <span className="h-1.5 w-1.5 rounded-full bg-ink-600" /> Secure workspace
-              </span>
-              <h1 className="mt-8 max-w-sm text-4xl font-semibold tracking-[-0.04em]">One health story.<br /><span className="text-ink-600">Better connected.</span></h1>
-              <p className="mt-5 max-w-sm text-sm leading-7 text-charcoal-500">Medication adherence, health signals and coordinated care — designed around the people who need to stay connected.</p>
-            </div>
-            <div className="grid grid-cols-3 gap-2 text-[10px] text-charcoal-500">
-              <div className="rounded-xl border border-paper-200 bg-paper-0 p-3"><span className="block text-ink-500">01</span>Patient</div>
-              <div className="rounded-xl border border-paper-200 bg-paper-0 p-3"><span className="block text-gold-500">02</span>Caregiver</div>
-              <div className="rounded-xl border border-paper-200 bg-paper-0 p-3"><span className="block text-ink-500">03</span>Physician</div>
-            </div>
-          </section>
-
-          <section className="p-6 sm:p-8 lg:p-10">
-            <div className="max-w-md">
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-ink-500">HealthSync access</p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight">{isLogin ? "Welcome back" : "Create your account"}</h2>
-              <p className="mt-2 text-sm leading-6 text-charcoal-500">{isLogin ? "Sign in to continue to your connected care workspace." : "Set up your workspace now. Secure database registration will be enabled next."}</p>
-
-              <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-                {!isLogin && (
-                  <label className="block">
-                    <span className="mb-2 block text-xs font-semibold text-charcoal-700">Full name</span>
-                    <span className="relative block">
-                      <UserRound className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal-500" />
-                      <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your name" className="h-12 w-full rounded-xl border border-paper-200 bg-paper-50 pl-10 pr-3 text-sm outline-none transition placeholder:text-charcoal-500 focus:border-ink-600" />
-                    </span>
-                  </label>
-                )}
-
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-charcoal-700">Email</span>
-                  <span className="relative block">
-                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal-500" />
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" required placeholder="you@example.com" className="h-12 w-full rounded-xl border border-paper-200 bg-paper-50 pl-10 pr-3 text-sm outline-none transition placeholder:text-charcoal-500 focus:border-ink-600" />
-                  </span>
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-charcoal-700">Password</span>
-                  <span className="relative block">
-                    <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-charcoal-500" />
-                    <input value={password} onChange={(e) => setPassword(e.target.value)} type={showPassword ? "text" : "password"} required minLength={6} placeholder="••••••••" className="h-12 w-full rounded-xl border border-paper-200 bg-paper-50 pl-10 pr-11 text-sm outline-none transition placeholder:text-charcoal-500 focus:border-ink-600" />
-                    <button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-charcoal-500 hover:bg-paper-100 hover:text-charcoal-900">
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </span>
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-xs font-semibold text-charcoal-700">Workspace role</span>
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="h-12 w-full rounded-xl border border-paper-200 bg-paper-50 px-3 text-sm outline-none focus:border-ink-600"
-                  >
-                    {roleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  {isLogin && (
-                    <span className="mt-1.5 block text-[10px] leading-4 text-charcoal-500">
-                      Select the role assigned to this account. The server verifies it before sign-in.
-                    </span>
-                  )}
-                </label>
-
-                {message && <div className="rounded-xl border border-gold-600/30 bg-gold-100 px-3 py-3 text-xs leading-5 text-gold-500">{message}</div>}
-
-                <button disabled={busy} className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-ink-800 px-4 text-sm font-bold text-white shadow-lg shadow-ink-800/15 transition hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-60">
-                  {busy ? "Please wait…" : isLogin ? "Log in to HealthSync" : "Create HealthSync account"}
-                  {!busy && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
-                </button>
-              </form>
-
-              <p className="mt-6 text-center text-[10px] leading-5 text-charcoal-500">HealthSync is a student project prototype. It is not a substitute for professional medical advice.</p>
-            </div>
-          </section>
-        </div>
-
-        <p className="mt-4 text-center text-[10px] text-charcoal-500">{location.pathname === "/login" ? "Sign in securely" : "Join the connected care demo"} · HealthSync</p>
-      </div>
-    </div>
-  );
+  return <main className={`auth-page ${isLogin ? "auth-login" : "auth-signup"}`}><AuthBrandPanel /><section className="auth-workspace" aria-labelledby="auth-title"><div className="auth-mobile-header"><Brand /><Link to="/" aria-label="Back to HealthSync home"><ArrowLeft /></Link></div><div className="auth-form-shell"><Link className="auth-back-link" to="/"><ArrowLeft /> Back to HealthSync</Link><div className="auth-heading"><span className="auth-kicker">{isLogin ? "HealthSync access" : "Create your workspace"}</span><h2 id="auth-title">{isLogin ? "Welcome back" : "Create your HealthSync account"}</h2><p>{isLogin ? "Sign in to continue to your HealthSync workspace." : "Join your connected care workspace in a few simple steps."}</p></div><form onSubmit={handleSubmit} noValidate>{!isLogin && <AuthInput id="full-name" label="Full name" icon={<UserRound />} value={name} onChange={(event) => { setName(event.target.value); clearError("name"); }} error={errors.name} required autoComplete="name" placeholder="Your full name" />}<AuthInput id="email" label="Email address" icon={<Mail />} value={email} onChange={(event) => { setEmail(event.target.value); clearError("email"); }} error={errors.email} type="email" required autoComplete="email" placeholder="you@example.com" />
+        <PasswordInput id="password" label="Password" value={password} onChange={(value) => { setPassword(value); clearError("password"); }} error={errors.password} autoComplete={isLogin ? "current-password" : "new-password"} show={showPassword} onToggle={() => setShowPassword((current) => !current)} />
+        {!isLogin && <><PasswordInput id="confirm-password" label="Confirm password" value={confirmPassword} onChange={(value) => { setConfirmPassword(value); clearError("confirmPassword"); }} error={errors.confirmPassword} autoComplete="new-password" show={showConfirmPassword} onToggle={() => setShowConfirmPassword((current) => !current)} /><p className={`password-requirement ${password.length >= 6 ? "is-met" : ""}`}><Check /> At least 6 characters</p></>}
+        <RoleSelector role={role} onChange={setRole} compact={isLogin} />
+        {message && <div className="auth-message" role="alert"><span>!</span><p>{message}</p></div>}
+        <button className="auth-submit" type="submit" disabled={busy} aria-busy={busy}>{busy ? <><span className="auth-spinner" aria-hidden="true" />{isLogin ? "Signing in..." : "Creating account..."}</> : <>{isLogin ? "Sign in" : "Create account"}<ArrowRight /></>}</button>
+      </form><p className="auth-switch">{isLogin ? "New to HealthSync?" : "Already have an account?"} <Link to={switchPath}>{isLogin ? "Create account" : "Log in"}</Link></p><p className="auth-disclaimer">HealthSync is a student project prototype and is not a substitute for professional medical advice.</p></div></section></main>;
 }
